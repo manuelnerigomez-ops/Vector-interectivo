@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta charset="UTF-8">
+<title>RA Vector Fuerza Interactivo</title>
+
+<!-- AFRAME -->
+<script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+
+<!-- ARJS -->
+<script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+
+<style>
+
+body{
+    margin:0;
+    overflow:hidden;
+    font-family:Arial;
+}
+
+#panel{
+    position:absolute;
+    top:10px;
+    left:10px;
+    background:white;
+    padding:12px;
+    border-radius:12px;
+    z-index:999;
+    width:280px;
+    box-shadow:0 0 10px rgba(0,0,0,0.3);
+}
+
+#coords{
+    margin-top:10px;
+    font-size:15px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="panel">
+
+<h3>Vector Fuerza 3D</h3>
+
+<p>
+Arrastra la esfera amarilla
+</p>
+
+<div id="coords">
+
+F = (2,3,5)
+
+<br><br>
+
+|F| = 6.16
+
+</div>
+
+</div>
+
+<a-scene
+embedded
+vr-mode-ui="enabled: false"
+renderer="logarithmicDepthBuffer: true;"
+arjs="sourceType: webcam; debugUIEnabled: false;">
+
+<!-- MARCADOR -->
+
+<a-marker preset="hiro">
+
+<!-- ========================= -->
+<!-- EJES -->
+<!-- ========================= -->
+
+<!-- X -->
+<a-cylinder
+position="3 0 0"
+rotation="0 0 90"
+radius="0.02"
+height="10"
+color="red">
+</a-cylinder>
+
+<!-- Y -->
+<a-cylinder
+position="0 3 0"
+radius="0.02"
+height="10"
+color="green">
+</a-cylinder>
+
+<!-- Z -->
+<a-cylinder
+position="0 0 3"
+rotation="90 0 0"
+radius="0.02"
+height="10"
+color="blue">
+</a-cylinder>
+
+<!-- ========================= -->
+<!-- ESCALAS -->
+<!-- ========================= -->
+
+<!-- X -->
+<a-text value="1" position="1 0 0" color="red"></a-text>
+<a-text value="2" position="2 0 0" color="red"></a-text>
+<a-text value="3" position="3 0 0" color="red"></a-text>
+
+<!-- Y -->
+<a-text value="1" position="0 1 0" color="green"></a-text>
+<a-text value="2" position="0 2 0" color="green"></a-text>
+<a-text value="3" position="0 3 0" color="green"></a-text>
+
+<!-- Z -->
+<a-text value="1" position="0 0 1" color="blue"></a-text>
+<a-text value="2" position="0 0 2" color="blue"></a-text>
+<a-text value="5" position="0 0 5" color="blue"></a-text>
+
+<!-- ========================= -->
+<!-- VECTOR -->
+<!-- ========================= -->
+
+<a-entity
+id="vectorLinea"
+line="start:0 0 0;
+      end:2 3 5;
+      color:#ff6600">
+</a-entity>
+
+<!-- ========================= -->
+<!-- PUNTA -->
+<!-- ========================= -->
+
+<a-cone
+id="puntaCono"
+position="2 3 5"
+radius-bottom="0.18"
+radius-top="0"
+height="0.4"
+color="#ff3300">
+</a-cone>
+
+<!-- ========================= -->
+<!-- ESFERA INTERACTIVA -->
+<!-- ========================= -->
+
+<a-sphere
+id="punta"
+position="2 3 5"
+radius="0.22"
+color="yellow">
+</a-sphere>
+
+<!-- ========================= -->
+<!-- PROYECCION XY -->
+<!-- ========================= -->
+
+<a-plane
+id="planoXY"
+position="1 1.5 0"
+width="2"
+height="3"
+color="#0000ff"
+opacity="0.25">
+</a-plane>
+
+<!-- ========================= -->
+<!-- PROYECCION XZ -->
+<!-- ========================= -->
+
+<a-plane
+id="planoXZ"
+position="1 0 2.5"
+rotation="-90 0 0"
+width="2"
+height="5"
+color="#00aa00"
+opacity="0.25">
+</a-plane>
+
+<!-- ========================= -->
+<!-- PROYECCION YZ -->
+<!-- ========================= -->
+
+<a-plane
+id="planoYZ"
+position="0 1.5 2.5"
+rotation="0 90 0"
+width="5"
+height="3"
+color="#ff00ff"
+opacity="0.25">
+</a-plane>
+
+</a-marker>
+
+<!-- CAMARA -->
+
+<a-entity camera></a-entity>
+
+</a-scene>
+
+<script>
+
+// ======================================
+// ELEMENTOS
+// ======================================
+
+const punta = document.querySelector("#punta");
+
+const cono = document.querySelector("#puntaCono");
+
+const vector = document.querySelector("#vectorLinea");
+
+const planoXY = document.querySelector("#planoXY");
+
+const planoXZ = document.querySelector("#planoXZ");
+
+const planoYZ = document.querySelector("#planoYZ");
+
+const coords = document.querySelector("#coords");
+
+// ======================================
+// VARIABLES
+// ======================================
+
+let x = 2;
+let y = 3;
+let z = 5;
+
+let dragging = false;
+
+// ======================================
+// TOQUE
+// ======================================
+
+window.addEventListener("touchstart", ()=>{
+
+    dragging = true;
+
+});
+
+window.addEventListener("touchend", ()=>{
+
+    dragging = false;
+
+});
+
+// ======================================
+// MOVIMIENTO
+// ======================================
+
+window.addEventListener("touchmove",(e)=>{
+
+if(!dragging) return;
+
+// ======================================
+// MAPEO SIMPLE DEL DEDO
+// ======================================
+
+x += (e.touches[0].clientX - window.innerWidth/2)*0.00002;
+
+y -= (e.touches[0].clientY - window.innerHeight/2)*0.00002;
+
+// LIMITES
+
+x = Math.max(0.2,Math.min(6,x));
+
+y = Math.max(0.2,Math.min(6,y));
+
+z = Math.max(0.2,Math.min(6,z));
+
+// ======================================
+// ACTUALIZAR POSICION
+// ======================================
+
+punta.setAttribute(
+    "position",
+    `${x} ${y} ${z}`
+);
+
+cono.setAttribute(
+    "position",
+    `${x} ${y} ${z}`
+);
+
+// ======================================
+// VECTOR
+// ======================================
+
+vector.setAttribute(
+"line",
+`start:0 0 0;
+ end:${x} ${y} ${z};
+ color:#ff6600`
+);
+
+// ======================================
+// PROYECCIONES
+// ======================================
+
+// XY
+
+planoXY.setAttribute(
+"position",
+`${x/2} ${y/2} 0`
+);
+
+planoXY.setAttribute(
+"width",
+x
+);
+
+planoXY.setAttribute(
+"height",
+y
+);
+
+// XZ
+
+planoXZ.setAttribute(
+"position",
+`${x/2} 0 ${z/2}`
+);
+
+planoXZ.setAttribute(
+"width",
+x
+);
+
+planoXZ.setAttribute(
+"height",
+z
+);
+
+// YZ
+
+planoYZ.setAttribute(
+"position",
+`0 ${y/2} ${z/2}`
+);
+
+planoYZ.setAttribute(
+"width",
+z
+);
+
+planoYZ.setAttribute(
+"height",
+y
+);
+
+// ======================================
+// MAGNITUD
+// ======================================
+
+let magnitud = Math.sqrt(
+x*x + y*y + z*z
+).toFixed(2);
+
+// ======================================
+// TEXTO
+// ======================================
+
+coords.innerHTML = `
+
+F = (${x.toFixed(2)},
+     ${y.toFixed(2)},
+     ${z.toFixed(2)})
+
+<br><br>
+
+|F| = ${magnitud}
+
+`;
+
+});
+
+</script>
+
+</body>
+</html>
